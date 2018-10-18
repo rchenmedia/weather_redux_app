@@ -1,0 +1,49 @@
+// Renders the List of Citys, needs access to redux state, so should be a Container
+
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import Chart from "../components/chart";
+import GoogleMap from "../components/google_map";
+
+class WeatherList extends Component {
+  renderWeather(cityData) {   //cityData is data coming from map function below
+    const name = cityData.city.name;
+    const temps = cityData.list.map(weather => weather.main.temp); //map function returns arrays needed for sparkline charts
+    const pressures = cityData.list.map(weather => weather.main.pressure);
+    const humidities = cityData.list.map(weather => weather.main.humidity);
+    const { lon, lat } = cityData.city.coord;
+
+    return (
+      <tr key={name}>
+        <td><GoogleMap lon={lon} lat={lat} /></td>
+        <td><Chart data={temps} color="orange" units="K" /></td>
+        <td><Chart data={pressures} color="green" units="hPa" /></td>
+        <td><Chart data={humidities} color="black" units="%" /></td>
+      </tr>
+    );
+  }
+
+  render() {          // props.weather data comes from redux reducers
+    return (
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>City</th>
+            <th>Temperature (K)</th>
+            <th>Pressure (hPa)</th>
+            <th>Humidity (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.props.weather.map(this.renderWeather)}
+        </tbody>
+      </table>
+    );
+  }
+}
+
+function mapStateToProps({ weather }) {  //ES6 destructuring - {weather} from reducers in index.js
+  return { weather };                    //{ weather:weather }
+}
+
+export default connect(mapStateToProps)(WeatherList);
